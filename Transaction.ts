@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import type { CertificateData } from "./model.js";
 
 export class Transaction {
@@ -20,5 +21,16 @@ export class Transaction {
             certificateData: this.certificateData,
             signature: this.signature.toString('base64'),
         };
+    }
+
+    isValid(): boolean {
+        const verifier = crypto.createVerify('SHA256');
+        const payload = JSON.stringify({
+            sender: this.sender,
+            recipient: this.recipient,
+            certificateData: this.certificateData,
+        });
+        verifier.update(payload).end();
+        return verifier.verify(this.sender, this.signature);
     }
 }
